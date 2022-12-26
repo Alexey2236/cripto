@@ -174,6 +174,7 @@
 </template>
 
 <script>
+import { loadTicker, getCoins } from "./api";
 export default {
   data() {
     return {
@@ -186,6 +187,7 @@ export default {
       presenceCoinList: false,
       filterFavorites: "",
       page: 1,
+      clearId: null,
     };
   },
 
@@ -201,6 +203,10 @@ export default {
     }
     this.getPriceCript();
     this.getListCoins();
+  },
+
+  unmounted() {
+    clearInterval(this.clearId);
   },
 
   methods: {
@@ -244,11 +250,8 @@ export default {
     getPriceCript() {
       try {
         this.tickers?.forEach((item) => {
-          setInterval(async () => {
-            const f = await fetch(
-              `https://min-api.cryptocompare.com/data/price?fsym=${item?.name}&tsyms=USD&api_key=02c4841bd6065d7d3c1eaaad3ee4834a3d251f61ee44545bad3141968e472d3f`
-            );
-            const data = await f.json();
+          this.clearId = setInterval(async () => {
+            const data = await loadTicker(item.name);
             this.tickers.find((t) => t.name === item.name).price =
               data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
 
@@ -264,10 +267,7 @@ export default {
 
     async getListCoins() {
       try {
-        const f = await fetch(
-          `https://min-api.cryptocompare.com/data/all/coinlist?summary=true`
-        );
-        const data = await f.json();
+        const data = await getCoins();
         this.coinsList.push(...Object.values(data.Data));
       } catch (e) {
         console.log(e.message);
@@ -276,7 +276,6 @@ export default {
 
     select(t) {
       this.sel = t;
-      this.graphList = [];
     },
 
     handleDelete(tickerToRemove) {
@@ -294,6 +293,10 @@ export default {
     },
   },
   watch: {
+    sel() {
+      this.graphList = [];
+    },
+
     ticker() {
       this.presenceCoinList = false;
       this.hints = this.filtered(this.coinsList, "Symbol", this.ticker);
