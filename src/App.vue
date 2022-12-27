@@ -3,11 +3,12 @@
     <div class="container">
       <div class="w-full my-4"></div>
       <section>
-        <div class="flex">
+        <div class="flex gap-5 items-center">
           <div class="max-w-xs">
             <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Тикер</label
-            >
+              >Тикер
+            </label>
+
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 ref="inpittop"
@@ -36,13 +37,20 @@
               Такой тикер уже добавлен
             </div>
           </div>
+          <select
+            v-model="selectedCurrency"
+            class="h-9 mt-6 pr-10 flex items-center border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+          >
+            <option v-for="currency in currencyList.sort()" :key="currency">
+              {{ currency }}
+            </option>
+          </select>
         </div>
         <button
           @click="add"
           type="button"
           class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
-          <!-- Heroicon name: solid/mail -->
           <svg
             class="-ml-0.5 mr-2 h-6 w-6"
             xmlns="http://www.w3.org/2000/svg"
@@ -83,11 +91,11 @@
             <div
               class="px-4 py-5 sm:p-6 text-center"
               :class="{
-                'bg-red-400': t.error === true,
+                'bg-red-100': t.error === true,
               }"
             >
               <dt class="text-sm font-medium text-gray-500 truncate">
-                {{ t.name.toUpperCase() }} - USD
+                {{ t.name.toUpperCase() }} - {{ selectedCurrency }}
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
                 {{ t.price }}
@@ -136,7 +144,7 @@
       <h1 class="text-center text-red-600 text-2xl mt-5" v-else>Монет нет</h1>
       <section class="relative" v-if="sel">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-          {{ sel.name.toUpperCase() }} - USD
+          {{ sel.name.toUpperCase() }} - {{ selectedCurrency }}
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div
@@ -179,7 +187,7 @@
 </template>
 
 <script>
-import { loadTicker, getCoins } from "./api";
+import { loadTicker, getCoins, getListCurrency } from "./api";
 export default {
   data() {
     return {
@@ -193,6 +201,8 @@ export default {
       filterFavorites: "",
       page: 1,
       clearId: null,
+      currencyList: [],
+      selectedCurrency: "RUB",
     };
   },
 
@@ -206,8 +216,12 @@ export default {
         localStorage.removeItem("tickers");
       }
     }
+    if (localStorage.selectedCurrency) {
+      this.selectedCurrency = localStorage.selectedCurrency;
+    }
     this.getPriceCript();
     this.getListCoins();
+    this.getCurrency();
   },
 
   unmounted() {
@@ -254,18 +268,20 @@ export default {
       try {
         this.tickers.forEach((item) => {
           this.clearId = setInterval(async () => {
-            const data = await loadTicker(item.name);
-            if (data.USD > 1) {
-              item.price = data.USD.toFixed(2);
-            } else if (data.USD < 1) {
-              item.price = data.USD.toPrecision(2);
+            const data = await loadTicker(item.name, this.selectedCurrency);
+            if (data[this.selectedCurrency] > 1) {
+              item.price = data[this.selectedCurrency].toFixed(2);
+              item.error = false;
+            } else if (data[this.selectedCurrency] < 1) {
+              item.price = data[this.selectedCurrency].toPrecision(2);
+              item.error = false;
             } else {
-              item.price = "- - -";
+              item.price = "x x x";
               item.error = true;
             }
 
             if (this.sel?.name === item.name) {
-              this.graphList.push(data.USD);
+              this.graphList.push(data[this.selectedCurrency]);
             }
           }, 4000);
         });
@@ -278,6 +294,15 @@ export default {
       try {
         const data = await getCoins();
         this.coinsList.push(...Object.values(data.Data));
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+
+    async getCurrency() {
+      try {
+        const data = await getListCurrency();
+        this.currencyList.push(...Object.keys(data.rates), "RUB");
       } catch (e) {
         console.log(e.message);
       }
@@ -313,6 +338,9 @@ export default {
       if (this.paginatedTickers.length === 0 && this.page > 1) {
         this.page -= 1;
       }
+    },
+    selectedCurrency(newName) {
+      localStorage.selectedCurrency = newName;
     },
   },
 
