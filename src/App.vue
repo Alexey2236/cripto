@@ -77,10 +77,15 @@
               'border-4': sel === t,
             }"
             :key="t.name"
-            @click="select(t)"
+            @click="sel = t"
             class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
           >
-            <div class="px-4 py-5 sm:p-6 text-center">
+            <div
+              class="px-4 py-5 sm:p-6 text-center"
+              :class="{
+                'bg-red-400': t.error === true,
+              }"
+            >
               <dt class="text-sm font-medium text-gray-500 truncate">
                 {{ t.name.toUpperCase() }} - USD
               </dt>
@@ -109,7 +114,7 @@
             </button>
           </div>
         </dl>
-        <div class="flex gap-5 justify-center mt-2">
+        <div v-if="tickers.length" class="flex gap-5 justify-center mt-2">
           <button
             v-if="page > 1"
             @click="page = page - 1"
@@ -214,25 +219,23 @@ export default {
       const parsed = JSON.stringify(this.tickers);
       localStorage.setItem("tickers", parsed);
     },
+
     add() {
       this.isIncludesItemOfList();
-      if (!this.ticker) {
-        return;
-      }
-
-      if (this.presenceCoinList) {
+      if (!this.ticker || this.presenceCoinList) {
         return;
       }
 
       const newTicker = {
         name: this.ticker,
         price: "...",
+        error: false,
       };
 
       this.tickers.unshift(newTicker);
       this.filterFavorites = "";
-      this.saveTickers();
       this.getPriceCript();
+      this.saveTickers();
       this.ticker = "";
     },
 
@@ -249,11 +252,17 @@ export default {
 
     getPriceCript() {
       try {
-        this.tickers?.forEach((item) => {
+        this.tickers.forEach((item) => {
           this.clearId = setInterval(async () => {
             const data = await loadTicker(item.name);
-            this.tickers.find((t) => t.name === item.name).price =
-              data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+            if (data.USD > 1) {
+              item.price = data.USD.toFixed(2);
+            } else if (data.USD < 1) {
+              item.price = data.USD.toPrecision(2);
+            } else {
+              item.price = "- - -";
+              item.error = true;
+            }
 
             if (this.sel?.name === item.name) {
               this.graphList.push(data.USD);
@@ -272,10 +281,6 @@ export default {
       } catch (e) {
         console.log(e.message);
       }
-    },
-
-    select(t) {
-      this.sel = t;
     },
 
     handleDelete(tickerToRemove) {
