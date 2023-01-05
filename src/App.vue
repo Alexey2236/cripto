@@ -39,7 +39,7 @@
           </div>
           <select
             v-model="selectedCurrency"
-            class="h-9 mt-6 pr-10 flex items-center border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+            class="h-10 mt-6 pr-10 flex items-center shadow-lg border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
           >
             <option v-for="currency in currencyList.sort()" :key="currency">
               {{ currency }}
@@ -49,20 +49,9 @@
         <button
           @click="add"
           type="button"
-          class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          class="shadow-lg my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
-          <svg
-            class="-ml-0.5 mr-2 h-6 w-6"
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="#ffffff"
-          >
-            <path
-              d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
-            ></path>
-          </svg>
+          <plus-sign-icon />
           Добавить
         </button>
       </section>
@@ -72,68 +61,70 @@
         type="text"
         name="search"
         id="wallet"
-        class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+        class="block w-full shadow-lg pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
         placeholder="Найти в избранном"
       />
       <template v-if="tickers.length">
         <hr class="w-full border-t border-gray-600 my-4" />
 
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div
-            v-for="t in paginatedTickers"
-            :class="{
-              'border-4': sel === t,
-            }"
-            :key="t.name"
-            @click="sel = t"
-            class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
-          >
+          <transition-group name="card-list">
             <div
-              class="px-4 py-5 sm:p-6 text-center"
+              v-for="t in paginatedTickers"
               :class="{
-                'bg-red-100': t.error === true,
+                'border-4': sel === t,
               }"
+              :key="t.name"
+              @click="sel = t"
+              class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
             >
-              <dt class="text-sm font-medium text-gray-500 truncate">
-                {{ t.name.toUpperCase() }} - {{ selectedCurrency }}
-              </dt>
-              <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                {{ t.price }}
-              </dd>
-            </div>
-            <div class="w-full border-t border-gray-200"></div>
-            <button
-              @click.stop="handleDelete(t)"
-              class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all focus:outline-none"
-            >
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="#718096"
-                aria-hidden="true"
+              <div
+                class="px-4 py-5 sm:p-6 text-center"
+                :class="{
+                  'bg-red-100': t.error === true,
+                }"
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clip-rule="evenodd"
-                ></path></svg
-              >Удалить
-            </button>
-          </div>
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                  {{ t.name.toUpperCase() }} - {{ selectedCurrency }}
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                  {{ t.price }}
+                </dd>
+              </div>
+              <div class="w-full border-t border-gray-200"></div>
+              <button
+                @click.stop="handleDelete(t)"
+                class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all focus:outline-none"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="#718096"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  ></path></svg
+                >Удалить
+              </button>
+            </div>
+          </transition-group>
         </dl>
         <div v-if="tickers.length" class="flex gap-5 justify-center mt-2">
           <button
             v-if="page > 1"
             @click="page = page - 1"
-            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            class="shadow-2xl my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Назад
           </button>
           <button
             v-if="hasNextPage"
             @click="page = page + 1"
-            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            class="shadow-2xl my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Вперед
           </button>
@@ -146,12 +137,18 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
           {{ sel.name.toUpperCase() }} - {{ selectedCurrency }}
         </h3>
-        <div class="flex items-end border-gray-600 border-b border-l h-64">
+        <div
+          class="flex items-end border-gray-600 border-b border-l h-64"
+          ref="graphRef"
+        >
           <div
             v-for="(graph, index) in normalizedGraph"
             :key="index"
-            :style="{ height: `${graph}%` }"
-            class="bg-purple-800 border w-10"
+            :style="{
+              height: `${graph}%`,
+              width: `${this.widthGraphElement}px`,
+            }"
+            class="bg-purple-800 border"
           ></div>
         </div>
         <button
@@ -188,13 +185,19 @@
 
 <script>
 import { loadTicker, getCoins, getListCurrency } from "./api";
+import PlusSignIcon from "./components/PlusSignIcon.vue";
 export default {
+  components: {
+    PlusSignIcon,
+  },
   data() {
     return {
       ticker: "",
       tickers: [],
       sel: null,
       graphList: [],
+      maxGraphElements: 1,
+      widthGraphElement: 38,
       coinsList: [],
       hints: [],
       presenceCoinList: false,
@@ -222,10 +225,16 @@ export default {
     this.getPriceCript();
     this.getListCoins();
     this.getCurrency();
+
+    window.addEventListener("resize", this.calculateMaxGraphElements);
   },
 
   unmounted() {
     clearInterval(this.clearId);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("resize", this.calculateMaxGraphElements);
   },
 
   methods: {
@@ -243,6 +252,7 @@ export default {
       const newTicker = {
         name: this.ticker,
         price: "...",
+        prevPrice: [],
         error: false,
       };
 
@@ -251,6 +261,13 @@ export default {
       this.getPriceCript();
       this.saveTickers();
       this.ticker = "";
+    },
+
+    select(ticker) {
+      this.sel = ticker;
+      this.$nextTick(() => {
+        this.calculateMaxGraphElements();
+      });
     },
 
     isIncludesItemOfList() {
@@ -271,17 +288,22 @@ export default {
             const data = await loadTicker(item.name, this.selectedCurrency);
             if (data[this.selectedCurrency] > 1) {
               item.price = data[this.selectedCurrency].toFixed(2);
+
               item.error = false;
             } else if (data[this.selectedCurrency] < 1) {
               item.price = data[this.selectedCurrency].toPrecision(2);
               item.error = false;
             } else {
-              item.price = "x x x";
+              item.price = "- - -";
               item.error = true;
             }
 
             if (this.sel?.name === item.name) {
               this.graphList.push(data[this.selectedCurrency]);
+            }
+
+            while (this.graphList.length > this.maxGraphElements) {
+              this.graphList.shift();
             }
           }, 4000);
         });
@@ -321,6 +343,14 @@ export default {
         item[name].toLocaleLowerCase().includes(current.toLocaleLowerCase())
       );
     },
+
+    calculateMaxGraphElements() {
+      if (!this.$refs.graphRef) {
+        return;
+      }
+      this.maxGraphElements =
+        this.$refs.graphRef.clientWidth / this.widthGraphElement;
+    },
   },
   watch: {
     sel() {
@@ -341,6 +371,7 @@ export default {
     },
     selectedCurrency(newName) {
       localStorage.selectedCurrency = newName;
+      this.graphList = [];
     },
   },
 
@@ -374,5 +405,19 @@ export default {
   },
 };
 </script>
+<style scoped>
+.card-list-enter-active,
+.card-list-leave-active {
+  transition: all 0.5s ease;
+}
 
-<style></style>
+.card-list-enter-from,
+.card-list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.card-list-move {
+  transition: transform 0.4s ease;
+}
+</style>
