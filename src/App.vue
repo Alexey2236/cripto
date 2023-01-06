@@ -21,18 +21,21 @@
                 placeholder="Например DOGE"
               />
             </div>
-            <div
-              v-if="ticker !== '' && hints.length !== 0"
-              class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap mt-2"
-            >
-              <span
-                @click="addHint(hint)"
-                v-for="hint in hints.slice(0, 4)"
-                :key="hint.Id"
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-                >{{ hint.Symbol }}</span
+            <transition name="hint">
+              <div
+                v-if="ticker !== '' && hints.length !== 0"
+                class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap mt-2"
               >
-            </div>
+                <span
+                  @click="addHint(hint)"
+                  v-for="hint in hints.slice(0, 4)"
+                  :key="hint.Id"
+                  class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+                  >{{ hint.Symbol }}</span
+                >
+              </div>
+            </transition>
+
             <div v-if="presenceCoinList" class="text-sm text-red-600 mt-2">
               Такой тикер уже добавлен
             </div>
@@ -419,5 +422,15 @@ export default {
 
 .card-list-move {
   transition: transform 0.4s ease;
+}
+
+.hint-enter-active,
+.hint-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.hint-enter-from,
+.hint-leave-to {
+  opacity: 0;
 }
 </style>
